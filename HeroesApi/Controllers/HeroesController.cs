@@ -11,9 +11,29 @@ public class HeroesController : ControllerBase {
 
 
     [HttpGet]
-    public ActionResult<List<Hero>> GetAll()
+    public ActionResult<List<Hero>> GetAll([FromQuery] string? universe = null)
     {
-        return Ok(HeroesStore.Heroes);
+        var heroes = HeroesStore.Heroes;
+        if (!string.IsNullOrEmpty(universe))
+        {
+            var filtered = heroes.Where(h => h.Universe.ToString() == universe).ToList();
+            return Ok(filtered);
+        }
+        return Ok(heroes);
+    }
+
+
+    [HttpGet("search")]
+    public ActionResult<List<Hero>> Search([FromQuery] string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return Ok(new List<Hero>());
+        }
+        var results = HeroesStore.Heroes
+            .Where(h => h.Name.Contains(name, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        return Ok(results);
     }
 
 
